@@ -1,8 +1,6 @@
 name: "Test FIPS"
 on:
   push:
-  pull_request:
-  workflow_dispatch:
 
 jobs:
   test-fips:

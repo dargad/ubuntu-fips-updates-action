@@ -1,0 +1,14 @@
+name: "Test FIPS"
+on:
+  push:
+
+jobs:
+  validate-fips:
+    uses: <owner>/<repo>/.github/workflows/enable-pro.yml@main
+    with:
+      workload: |
+        openssl version
+        cat /proc/sys/crypto/fips_enabled
+        pro status --format json
+    secrets:
+      UBUNTU_PRO_TOKEN: ${{ secrets.PRO_TOKEN }}
