@@ -1,0 +1,14 @@
+name: "Enable Ubuntu Pro in LXD VM"
+on: push
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Setup LXD
+      uses: canonical/setup-lxd@[version]
+      with:
+        channel: latest/edge
+
+    - name: Launch VM
+        lxc launch ubuntu:24.04 ubuntu-pro --vm -c limits.cpu=4 -c limits.memory=8GiB --console=vga
