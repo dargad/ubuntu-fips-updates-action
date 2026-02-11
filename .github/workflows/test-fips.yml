@@ -1,0 +1,13 @@
+name: "Test FIPS"
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-fips:
+    uses: ./.github/workflows/enable-pro.yml
+    with:
+      workload: 'pro status --format json'
+    secrets:
+      PRO_TOKEN: ${{ secrets.PRO_TOKEN }}

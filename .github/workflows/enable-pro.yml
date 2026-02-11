@@ -1,5 +1,14 @@
 name: "Enable Ubuntu Pro in LXD VM"
-on: push
+on:
+  workflow_call:
+    inputs:
+      workload:
+        description: 'Commands to run inside the VM after Pro FIPS-updates is enabled'
+        required: true
+        type: string
+    secrets:
+      UBUNTU_PRO_TOKEN:
+        required: true
 jobs:
   setup-pro-with-fips-updates:
     runs-on: ubuntu-latest
@@ -39,9 +48,9 @@ jobs:
 
     - name: Workload
       run: |
-        lxc exec ubuntu-pro -- pro status --format json
+        lxc exec ubuntu-pro -- bash -c '${{ inputs.workload }}'
 
     - name: Detach from Pro
       run: |
-        lxc exec ubuntu-pro -- pro detach --assume-yes
+        lxc exec ubuntu-pro -- pro detach --assume-yes --format json
       
