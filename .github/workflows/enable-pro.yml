@@ -31,5 +31,5 @@ jobs:
 
     - name: Detach from Pro
       run: |
-        lxc exec ubuntu-pro -- pro detach
+        lxc exec ubuntu-pro -- pro detach --assume-yes
       
