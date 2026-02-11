@@ -28,7 +28,6 @@ jobs:
     - name: Enable fips-updates
       run: |
         lxc exec ubuntu-pro -- pro enable --assume-yes fips-updates
-        
 
     - name: Reboot
       run: |
@@ -40,7 +39,7 @@ jobs:
 
     - name: Workload
       run: |
-        lxc exec ubuntu-pro -- pro status
+        lxc exec ubuntu-pro -- pro status --format json
 
     - name: Detach from Pro
       run: |
