@@ -9,6 +9,6 @@ jobs:
       workload: |
         openssl version
         cat /proc/sys/crypto/fips_enabled
-        pro status --format json
+        cat /proc/cmdline
     secrets:
       UBUNTU_PRO_TOKEN: ${{ secrets.PRO_TOKEN }}
