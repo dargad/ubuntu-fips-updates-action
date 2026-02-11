@@ -10,4 +10,4 @@ jobs:
         channel: latest/edge
     - name: Launch VM
       run: |
-        lxc launch ubuntu:24.04 ubuntu-pro --vm -c limits.cpu=4 -c limits.memory=8GiB --console=vga
+        lxc launch ubuntu:24.04 ubuntu-pro --vm
