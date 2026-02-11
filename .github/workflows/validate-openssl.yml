@@ -4,7 +4,7 @@ on:
 
 jobs:
   validate-fips:
-    uses: <owner>/<repo>/.github/workflows/enable-pro.yml@main
+    uses: ./.github/workflows/enable-pro.yml
     with:
       workload: |
         openssl version
