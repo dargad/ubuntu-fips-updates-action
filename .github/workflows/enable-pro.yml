@@ -1,7 +1,7 @@
 name: "Enable Ubuntu Pro in LXD VM"
 on: push
 jobs:
-  job1:
+  setup-pro-with-fips-updates:
     runs-on: ubuntu-latest
     steps:
     - name: Setup LXD
@@ -24,6 +24,19 @@ jobs:
         token=${{ secrets.PRO_TOKEN }}
         # Attach the token to the VM
         lxc exec ubuntu-pro -- pro attach $token
+
+    - name: Enable fips-updates
+      run: |
+        lxc exec ubuntu-pro -- pro enable --assume-yes fips-updates
+        
+
+    - name: Reboot
+      run: |
+        lxc exec ubuntu-pro -- reboot
+        # Wait for LXD agent to be available
+        while ! lxc exec ubuntu-pro -- true 2>/dev/null; do
+          sleep 1
+        done
 
     - name: Workload
       run: |
