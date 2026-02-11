@@ -52,5 +52,6 @@ jobs:
 
     - name: Detach from Pro
       run: |
-        lxc exec ubuntu-pro -- pro detach --assume-yes --format json
+        # Exit 129 (SIGHUP) can occur when pro detach terminates services; ignore it
+        lxc exec ubuntu-pro -- pro detach --assume-yes --format json || [[ $? -eq 129 ]]
       
