@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Setup LXD
-      uses: canonical/setup-lxd@[version]
+      uses: canonical/setup-lxd@main
       with:
         channel: latest/edge
     - name: Launch VM
