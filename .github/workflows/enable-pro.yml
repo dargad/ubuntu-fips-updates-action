@@ -40,7 +40,8 @@ jobs:
 
     - name: Reboot
       run: |
-        lxc exec ubuntu-pro -- reboot
+        lxc reboot ubuntu-pro
+        sleep 5 # Give it a moment to start rebooting
         # Wait for LXD agent to be available
         while ! lxc exec ubuntu-pro -- true 2>/dev/null; do
           sleep 1
