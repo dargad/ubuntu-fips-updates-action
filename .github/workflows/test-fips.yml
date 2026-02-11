@@ -10,4 +10,4 @@ jobs:
     with:
       workload: 'pro status --format json'
     secrets:
-      PRO_TOKEN: ${{ secrets.PRO_TOKEN }}
+      UBUNTU_PRO_TOKEN: ${{ secrets.PRO_TOKEN }}

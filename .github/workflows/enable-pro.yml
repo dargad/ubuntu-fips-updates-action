@@ -30,7 +30,7 @@ jobs:
     - name: Enable Pro
       run: |
         # Pull out the token from the secrets
-        token=${{ secrets.PRO_TOKEN }}
+        token=${{ secrets.UBUNTU_PRO_TOKEN }}
         # Attach the token to the VM
         lxc exec ubuntu-pro -- pro attach $token
 
