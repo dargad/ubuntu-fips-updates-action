@@ -11,3 +11,25 @@ jobs:
     - name: Launch VM
       run: |
         lxc launch ubuntu:24.04 ubuntu-pro --vm
+        # Wait for LXD agent to be available
+        while ! lxc exec ubuntu-pro -- true 2>/dev/null; do
+          sleep 1
+        done
+        # Wait for cloud-init to finish
+        lxc exec ubuntu-pro -- cloud-init status --wait
+
+    - name: Enable Pro
+      run: |
+        # Pull out the token from the secrets
+        token=${{ secrets.PRO_TOKEN }}
+        # Attach the token to the VM
+        lxc exec ubuntu-pro -- pro attach $token
+
+    - name: Workload
+      run: |
+        lxc exec ubuntu-pro -- pro status
+
+    - name: Detach from Pro
+      run: |
+        lxc exec ubuntu-pro -- pro detach
+      
