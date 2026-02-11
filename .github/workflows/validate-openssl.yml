@@ -1,4 +1,4 @@
-name: "Test FIPS"
+name: "Validate OpenSSL FIPS mode in LXD VM"
 on:
   push:
 
