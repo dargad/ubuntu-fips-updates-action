@@ -1,0 +1,12 @@
+name: "Test opensc"
+on:
+  push:
+
+jobs:
+  test-fips:
+    uses: ./.github/workflows/enable-pro.yml
+    with:
+      checkout_repo: 'opensc/opensc'
+      workload: 'ls /shared/repo'
+    secrets:
+      UBUNTU_PRO_TOKEN: ${{ secrets.PRO_TOKEN }}
