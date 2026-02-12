@@ -34,6 +34,11 @@ jobs:
         # Attach the token to the VM
         lxc exec ubuntu-pro -- pro attach $token
 
+    - name: Add shared directory
+      run: |
+        mkdir -p ${{ github.workspace }}/shared
+        lxc config device add ubuntu-pro shared disk source=${{ github.workspace }}/shared path=/shared
+
     - name: Enable fips-updates
       run: |
         lxc exec ubuntu-pro -- pro enable --assume-yes fips-updates
@@ -49,6 +54,7 @@ jobs:
 
     - name: Workload
       run: |
+        ls
         lxc exec ubuntu-pro -- bash -c '${{ inputs.workload }}'
 
     - name: Detach from Pro
