@@ -13,6 +13,12 @@ jobs:
   setup-pro-with-fips-updates:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      if: ${{ inputs.checkout_repo != '' }}
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.checkout_repo }}
+        path: shared/repo
     - name: Setup LXD
       uses: canonical/setup-lxd@main
       with:
@@ -61,4 +67,3 @@ jobs:
       run: |
         # Exit 129 (SIGHUP) can occur when pro detach terminates services; ignore it
         lxc exec ubuntu-pro -- pro detach --assume-yes --format json || [[ $? -eq 129 ]]
-      
