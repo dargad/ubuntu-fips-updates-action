@@ -6,6 +6,11 @@ on:
         description: 'Commands to run inside the VM after Pro FIPS-updates is enabled'
         required: true
         type: string
+      checkout_repo:
+        description: 'Repository to checkout (e.g., opensc/opensc). Leave empty to skip.'
+        required: false
+        type: string
+        default: ''
     secrets:
       UBUNTU_PRO_TOKEN:
         required: true
