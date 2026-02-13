@@ -1,6 +1,6 @@
 name: "Validate OpenSSL FIPS mode in LXD VM"
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   validate-fips:

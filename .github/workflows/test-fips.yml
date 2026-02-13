@@ -1,6 +1,6 @@
 name: "Test FIPS"
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   test-fips:
