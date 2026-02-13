@@ -1,0 +1,72 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Lint action files
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate action.yml syntax
+        run: |
+          for f in action.yml run/action.yml cleanup/action.yml; do
+            echo "Validating $f..."
+            python3 -c "import yaml; yaml.safe_load(open('$f'))"
+          done
+          echo "All action files are valid YAML"
+
+  # Full integration test (requires PRO_TOKEN secret)
+  test:
+    runs-on: ubuntu-latest
+    # Only run if PRO_TOKEN is available (not on forks)
+    if: github.event_name == 'workflow_dispatch' || github.repository == github.event.pull_request.head.repo.full_name
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup FIPS environment
+        uses: ./
+        with:
+          pro-token: ${{ secrets.PRO_TOKEN }}
+
+      - name: Verify FIPS is enabled
+        uses: ./run
+        with:
+          commands: |
+            echo "=== FIPS Status ==="
+            cat /proc/sys/crypto/fips_enabled
+            
+            echo "=== Kernel cmdline ==="
+            cat /proc/cmdline
+            
+            echo "=== OpenSSL version ==="
+            openssl version
+            
+            echo "=== OpenSSL providers ==="
+            openssl list -providers
+
+      - name: Test FIPS restrictions
+        uses: ./run
+        with:
+          commands: |
+            # MD5 should be disabled in FIPS mode
+            if openssl dgst -md5 /dev/null 2>&1; then
+              echo "FAIL: MD5 should be disabled in FIPS mode"
+              exit 1
+            fi
+            echo "PASS: MD5 correctly disabled in FIPS mode"
+            
+            # SHA-256 should work
+            echo "test" | openssl dgst -sha256
+            echo "PASS: SHA-256 works in FIPS mode"
+
+      - name: Cleanup
+        if: always()
+        uses: ./cleanup
+        with:
+          vm-name: fips-vm
