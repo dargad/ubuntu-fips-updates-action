@@ -65,6 +65,12 @@ jobs:
 
     - name: Workload
       run: |
+        
+        echo "PWD: $PWD"
+        echo "Contents of current directory:"
+        ls -la
+        echo "Contents of GitHub workspace:"
+        ls -la ${{ github.workspace }}
         lxc exec ubuntu-pro -- bash -c 'cd /shared/repo; ${{ inputs.workload }}'
 
     - name: Detach from Pro
