@@ -46,7 +46,7 @@ jobs:
         if: always()
         run: |
           mkdir -p results
-          lxc file pull fips-vm/shared/test-results.xml results/ 2>/dev/null || true
+          sudo lxc file pull fips-vm/shared/test-results.xml results/ 2>/dev/null || true
 
       - name: Upload results
         if: always()

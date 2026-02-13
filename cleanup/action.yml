@@ -22,12 +22,12 @@ runs:
         VM_NAME: ${{ inputs.vm-name }}
       run: |
         # Exit 129 (SIGHUP) can occur when pro detach terminates services; ignore it
-        lxc exec "${VM_NAME}" -- pro detach --assume-yes --format json || [[ $? -eq 129 ]]
+        sudo lxc exec "${VM_NAME}" -- pro detach --assume-yes --format json || [[ $? -eq 129 ]]
 
     - name: Stop and delete VM
       shell: bash
       env:
         VM_NAME: ${{ inputs.vm-name }}
       run: |
-        lxc stop "${VM_NAME}" --force 2>/dev/null || true
-        lxc delete "${VM_NAME}" --force 2>/dev/null || true
+        sudo lxc stop "${VM_NAME}" --force 2>/dev/null || true
+        sudo lxc delete "${VM_NAME}" --force 2>/dev/null || true

@@ -51,14 +51,14 @@ runs:
         CPU_LIMIT: ${{ inputs.cpu-limit }}
         MEMORY_LIMIT: ${{ inputs.memory-limit }}
       run: |
-        lxc launch "ubuntu:${UBUNTU_VERSION}" "${VM_NAME}" --vm \
+        sudo lxc launch "ubuntu:${UBUNTU_VERSION}" "${VM_NAME}" --vm \
           -c "limits.cpu=${CPU_LIMIT}" \
           -c "limits.memory=${MEMORY_LIMIT}"
         
         echo "Waiting for VM to be ready..."
-        timeout 300 bash -c "while ! lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
+        timeout 300 bash -c "while ! sudo lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
         
-        lxc exec "${VM_NAME}" -- cloud-init status --wait
+        sudo lxc exec "${VM_NAME}" -- cloud-init status --wait
 
     - name: Attach Ubuntu Pro
       shell: bash
@@ -66,7 +66,7 @@ runs:
         VM_NAME: ${{ inputs.vm-name }}
         PRO_TOKEN: ${{ inputs.pro-token }}
       run: |
-        lxc exec "${VM_NAME}" -- pro attach "${PRO_TOKEN}"
+        sudo lxc exec "${VM_NAME}" -- pro attach "${PRO_TOKEN}"
 
     - name: Setup shared directory
       if: inputs.shared-path != ''
@@ -75,7 +75,7 @@ runs:
         VM_NAME: ${{ inputs.vm-name }}
         SHARED_PATH: ${{ inputs.shared-path }}
       run: |
-        lxc config device add "${VM_NAME}" shared disk \
+        sudo lxc config device add "${VM_NAME}" shared disk \
           source="${SHARED_PATH}" \
           path=/shared
 
@@ -84,21 +84,21 @@ runs:
       env:
         VM_NAME: ${{ inputs.vm-name }}
       run: |
-        lxc exec "${VM_NAME}" -- pro enable --assume-yes fips-updates
+        sudo lxc exec "${VM_NAME}" -- pro enable --assume-yes fips-updates
 
     - name: Reboot VM for FIPS
       shell: bash
       env:
         VM_NAME: ${{ inputs.vm-name }}
       run: |
-        lxc restart "${VM_NAME}"
+        sudo lxc restart "${VM_NAME}"
         sleep 5
         
         echo "Waiting for VM to come back up..."
-        timeout 300 bash -c "while ! lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
+        timeout 300 bash -c "while ! sudo lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
         
         # Verify FIPS is enabled
-        fips_status=$(lxc exec "${VM_NAME}" -- cat /proc/sys/crypto/fips_enabled)
+        fips_status=$(sudo lxc exec "${VM_NAME}" -- cat /proc/sys/crypto/fips_enabled)
         if [[ "$fips_status" != "1" ]]; then
           echo "::error::FIPS mode not enabled (got: $fips_status)"
           exit 1

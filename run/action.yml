@@ -31,7 +31,7 @@ runs:
         FIPS_SHELL: ${{ inputs.shell }}
       run: |
         if [[ -n "$FIPS_WORKDIR" ]]; then
-          lxc exec "$FIPS_VM_NAME" --cwd "$FIPS_WORKDIR" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
+          sudo lxc exec "$FIPS_VM_NAME" --cwd "$FIPS_WORKDIR" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
         else
-          lxc exec "$FIPS_VM_NAME" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
+          sudo lxc exec "$FIPS_VM_NAME" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
         fi

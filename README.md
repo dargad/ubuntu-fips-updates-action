@@ -138,7 +138,7 @@ Detaches from Ubuntu Pro and deletes the VM. **Always run this in an `if: always
 - name: Copy results from VM
   run: |
     mkdir -p results
-    lxc file pull fips-vm/tmp/results.xml results/
+    sudo lxc file pull fips-vm/tmp/results.xml results/
 
 - uses: actions/upload-artifact@v4
   with:
