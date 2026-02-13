@@ -1,0 +1,62 @@
+# Example: Build and test a project in FIPS mode
+#
+# Copy this workflow to your repository's .github/workflows/ directory.
+# Requires a PRO_TOKEN secret with your Ubuntu Pro token.
+
+name: Test in FIPS
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-in-fips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup FIPS environment
+        uses: canonical/ubuntu-fips-updates-action@v1
+        with:
+          pro-token: ${{ secrets.PRO_TOKEN }}
+          shared-path: ${{ github.workspace }}
+
+      - name: Install build dependencies
+        uses: canonical/ubuntu-fips-updates-action/run@v1
+        with:
+          commands: |
+            apt-get update
+            apt-get install -y build-essential
+
+      - name: Build
+        uses: canonical/ubuntu-fips-updates-action/run@v1
+        with:
+          working-directory: /shared
+          commands: make
+
+      - name: Run tests
+        uses: canonical/ubuntu-fips-updates-action/run@v1
+        with:
+          working-directory: /shared
+          commands: make test
+
+      - name: Copy test results
+        if: always()
+        run: |
+          mkdir -p results
+          lxc file pull fips-vm/shared/test-results.xml results/ 2>/dev/null || true
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: results/
+
+      - name: Cleanup
+        if: always()
+        uses: canonical/ubuntu-fips-updates-action/cleanup@v1
+        with:
+          vm-name: fips-vm

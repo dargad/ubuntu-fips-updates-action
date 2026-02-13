@@ -1,0 +1,33 @@
+name: 'Cleanup FIPS VM'
+description: 'Detaches from Ubuntu Pro and cleans up the VM'
+author: 'Canonical'
+
+inputs:
+  vm-name:
+    description: 'Name of the VM to cleanup'
+    required: false
+    default: 'fips-vm'
+  detach-pro:
+    description: 'Whether to detach from Ubuntu Pro before cleanup'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Detach from Ubuntu Pro
+      if: inputs.detach-pro == 'true'
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+      run: |
+        # Exit 129 (SIGHUP) can occur when pro detach terminates services; ignore it
+        lxc exec "${VM_NAME}" -- pro detach --assume-yes --format json || [[ $? -eq 129 ]]
+
+    - name: Stop and delete VM
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+      run: |
+        lxc stop "${VM_NAME}" --force 2>/dev/null || true
+        lxc delete "${VM_NAME}" --force 2>/dev/null || true

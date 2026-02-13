@@ -1,0 +1,37 @@
+name: 'Run in FIPS VM'
+description: 'Execute commands inside the FIPS-enabled VM'
+author: 'Canonical'
+
+inputs:
+  vm-name:
+    description: 'Name of the VM to run commands in'
+    required: false
+    default: 'fips-vm'
+  commands:
+    description: 'Commands to run inside the VM'
+    required: true
+  working-directory:
+    description: 'Working directory inside the VM'
+    required: false
+    default: ''
+  shell:
+    description: 'Shell to use (bash, sh)'
+    required: false
+    default: 'bash'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Execute commands in VM
+      shell: bash
+      env:
+        FIPS_VM_NAME: ${{ inputs.vm-name }}
+        FIPS_COMMANDS: ${{ inputs.commands }}
+        FIPS_WORKDIR: ${{ inputs.working-directory }}
+        FIPS_SHELL: ${{ inputs.shell }}
+      run: |
+        if [[ -n "$FIPS_WORKDIR" ]]; then
+          lxc exec "$FIPS_VM_NAME" --cwd "$FIPS_WORKDIR" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
+        else
+          lxc exec "$FIPS_VM_NAME" -- "$FIPS_SHELL" -c "$FIPS_COMMANDS"
+        fi

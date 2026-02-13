@@ -1,0 +1,46 @@
+# Example: Validate OpenSSL FIPS mode
+#
+# Copy this workflow to your repository's .github/workflows/ directory.
+# Requires a PRO_TOKEN secret with your Ubuntu Pro token.
+
+name: Validate OpenSSL FIPS
+on:
+  workflow_dispatch:
+
+jobs:
+  validate-fips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup FIPS environment
+        uses: canonical/ubuntu-fips-updates-action@v1
+        with:
+          pro-token: ${{ secrets.PRO_TOKEN }}
+
+      - name: Validate FIPS is enabled
+        uses: canonical/ubuntu-fips-updates-action/run@v1
+        with:
+          commands: |
+            openssl version
+            cat /proc/sys/crypto/fips_enabled
+            cat /proc/cmdline
+
+      - name: Test FIPS restrictions
+        uses: canonical/ubuntu-fips-updates-action/run@v1
+        with:
+          commands: |
+            echo "Testing FIPS OpenSSL..."
+            openssl list -providers
+            
+            # Test that MD5 is disabled in FIPS mode
+            if openssl dgst -md5 /dev/null 2>&1; then
+              echo "ERROR: MD5 should be disabled in FIPS mode"
+              exit 1
+            else
+              echo "OK: MD5 correctly disabled"
+            fi
+
+      - name: Cleanup
+        if: always()
+        uses: canonical/ubuntu-fips-updates-action/cleanup@v1
+        with:
+          vm-name: fips-vm

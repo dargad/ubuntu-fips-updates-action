@@ -1,0 +1,106 @@
+name: 'Ubuntu FIPS-Updates Environment'
+description: 'Sets up an Ubuntu VM with FIPS-updates enabled via Ubuntu Pro'
+author: 'Canonical'
+branding:
+  icon: 'shield'
+  color: 'orange'
+
+inputs:
+  pro-token:
+    description: 'Ubuntu Pro token for enabling FIPS-updates'
+    required: true
+  vm-name:
+    description: 'Name for the LXD VM'
+    required: false
+    default: 'fips-vm'
+  ubuntu-version:
+    description: 'Ubuntu version to use (e.g., 24.04, 22.04)'
+    required: false
+    default: '24.04'
+  cpu-limit:
+    description: 'Number of CPUs for the VM'
+    required: false
+    default: '2'
+  memory-limit:
+    description: 'Memory limit for the VM (e.g., 4GiB)'
+    required: false
+    default: '4GiB'
+  shared-path:
+    description: 'Host path to share with the VM (mounted at /shared in VM)'
+    required: false
+    default: ''
+
+outputs:
+  vm-name:
+    description: 'Name of the created VM (use with lxc exec)'
+    value: ${{ inputs.vm-name }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup LXD
+      uses: canonical/setup-lxd@v0.1.1
+      with:
+        channel: latest/stable
+
+    - name: Launch VM
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+        UBUNTU_VERSION: ${{ inputs.ubuntu-version }}
+        CPU_LIMIT: ${{ inputs.cpu-limit }}
+        MEMORY_LIMIT: ${{ inputs.memory-limit }}
+      run: |
+        lxc launch "ubuntu:${UBUNTU_VERSION}" "${VM_NAME}" --vm \
+          -c "limits.cpu=${CPU_LIMIT}" \
+          -c "limits.memory=${MEMORY_LIMIT}"
+        
+        echo "Waiting for VM to be ready..."
+        timeout 300 bash -c "while ! lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
+        
+        lxc exec "${VM_NAME}" -- cloud-init status --wait
+
+    - name: Attach Ubuntu Pro
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+        PRO_TOKEN: ${{ inputs.pro-token }}
+      run: |
+        lxc exec "${VM_NAME}" -- pro attach "${PRO_TOKEN}"
+
+    - name: Setup shared directory
+      if: inputs.shared-path != ''
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+        SHARED_PATH: ${{ inputs.shared-path }}
+      run: |
+        lxc config device add "${VM_NAME}" shared disk \
+          source="${SHARED_PATH}" \
+          path=/shared
+
+    - name: Enable FIPS-updates
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+      run: |
+        lxc exec "${VM_NAME}" -- pro enable --assume-yes fips-updates
+
+    - name: Reboot VM for FIPS
+      shell: bash
+      env:
+        VM_NAME: ${{ inputs.vm-name }}
+      run: |
+        lxc restart "${VM_NAME}"
+        sleep 5
+        
+        echo "Waiting for VM to come back up..."
+        timeout 300 bash -c "while ! lxc exec '${VM_NAME}' -- true 2>/dev/null; do sleep 1; done"
+        
+        # Verify FIPS is enabled
+        fips_status=$(lxc exec "${VM_NAME}" -- cat /proc/sys/crypto/fips_enabled)
+        if [[ "$fips_status" != "1" ]]; then
+          echo "::error::FIPS mode not enabled (got: $fips_status)"
+          exit 1
+        fi
+        echo "FIPS mode verified: enabled"
