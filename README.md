@@ -44,6 +44,8 @@ jobs:
 |------|-------------|----------|
 | `UBUNTU_PRO_TOKEN` | Your Ubuntu Pro subscription token | Yes |
 
+More info at https://ubuntu.com/pro.
+
 ## Example
 
 Run OpenSSL FIPS validation:
