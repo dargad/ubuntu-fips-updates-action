@@ -39,7 +39,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup LXD
-      uses: canonical/setup-lxd@v0.1.3
+      uses: canonical/setup-lxd@v1
       with:
         channel: latest/stable
 
